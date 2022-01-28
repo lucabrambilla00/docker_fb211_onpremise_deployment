@@ -1,6 +1,7 @@
 README.md
 ## Introduzione
 Ambiente per installazione suite Farbooking > 2.11 + eventuale lockers e welcome tramite playbook ansible playbook-FB.yml in ambiente Onpremise
+
 L'installazione prevede un docker swarm a 2 nodi con storage condiviso tramite glusterFS
 
 ## Prerequisiti
