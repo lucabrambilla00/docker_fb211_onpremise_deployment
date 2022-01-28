@@ -26,4 +26,4 @@ La rete interna docker è una overlay encrypted, questo richiede una particolare
 
 è possibile effettuare il redeploy di una singola app , definendo la extra vars redeploy(array) inserendo all'interno la/le app che si vogliono re-deployare (esempio welcome-core)
 
-    ansible-playbook playbook-FB.yml -i d2nodes_inventory.yml  --extedeploy={welcome_core}"
+    ansible-playbook playbook-FB.yml -i d2nodes_inventory.yml  --extra-vars="redeploy={welcome_core}"
