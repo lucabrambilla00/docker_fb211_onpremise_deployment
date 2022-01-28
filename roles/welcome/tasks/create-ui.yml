@@ -1,0 +1,15 @@
+---
+- name: create welcome-ui service
+  docker_swarm_service:
+    name: welcome-ui
+    image: "{{ welcome_ui_image }}"
+    networks:
+      - farbooking-network
+    placement:
+      constraints:
+        - "node.hostname=={{ groups['docker_nodes'][1] }}"
+    limits:
+      cpus: '0.20'
+      memory: 500M
+    replicas: 1
+

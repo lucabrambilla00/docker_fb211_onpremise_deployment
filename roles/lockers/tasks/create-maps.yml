@@ -1,0 +1,14 @@
+---
+- name: create lockers-maps service
+  docker_swarm_service:
+    name: lockers-maps
+    image: "{{ lockers_maps_image }}"
+    networks:
+      - farbooking-network
+    replicas: 1
+    placement:
+      constraints:
+        - "node.hostname=={{ groups['docker_nodes'][0] }}"
+    limits:
+      cpus: '0.20'
+      memory: 500M

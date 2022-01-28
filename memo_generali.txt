@@ -1,0 +1,27 @@
+MEMO DOCUMENTAZIONE
+- glusterFS: max 3 nodi
+
+
+1 - creare tutte le folder e i rispettivi files , controllare dalle immagini i rispettivi permessi 
+
+folder
+/swarm/farbooking/
+/swarm/farbooking/fileuploader/data
+/swarm/farbooking/mongodb-primary/data 
+/swarm/farbooking/nginx
+/swarm/farbooking/postgresql/data   --> 1001:1001
+/swarm/farbooking/farbooking/data --> 1000 - 1000
+
+
+files
+/swarm/farbooking/mongodb-primary/init-mongo.js  ( da parametrizzare vedi postactivities mongodb)
+/swarm/farbooking/nginx/https.conf e /swarm/farbooking/nginx/nginx.conf
+/swarm/farbooking/postgresql/init.sh  --> 1001:1001
+
+
+$m@rw0rk1ng!
+
+
+###### GET TENANT
+https://10.3.8.182/farbooking/admin/svc/api/tenant
+ignore certs!! inseucure!!

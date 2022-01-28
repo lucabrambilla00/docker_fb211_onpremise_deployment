@@ -1,0 +1,41 @@
+---
+- name: ensure ufw installed
+  apt: name=ufw update_cache=true
+
+- name: Allow traffic for internal Docker network 
+  community.general.ufw:
+    rule: allow
+    route: no
+    src: 172.28.0.0/16
+    dest: 172.28.0.0/16
+
+- name: allow ssh connection for ansible
+  community.general.ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+
+- name: open 443 for farbooking svcs
+  community.general.ufw:
+    rule: allow
+    port: '443'
+    proto: tcp
+
+- name: open 8183 for farbooking svcs
+  community.general.ufw:
+    rule: allow
+    port: '8183'
+    proto: tcp
+
+- name: open 8080 for farbooking svcs
+  community.general.ufw:
+    rule: allow
+    port: '8080'
+    proto: tcp
+
+
+- name: enable ufw service
+  ufw:
+    state: enabled
+
+# tasks file for fw-initial-setup

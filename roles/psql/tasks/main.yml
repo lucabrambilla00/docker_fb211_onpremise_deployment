@@ -1,0 +1,19 @@
+---
+- block:
+    - name: remove psql service
+      docker_swarm_service:
+        name: psql
+        state: absent
+
+    - name: create psql service
+      import_tasks: create.yml
+
+  when:
+     - redeploy is defined
+     - '"psql" in redeploy'
+
+- name: create psql service
+  import_tasks: create.yml
+
+
+# tasks file for psql

@@ -1,0 +1,17 @@
+---
+- block:
+    - name: remove nginx service
+      docker_swarm_service:
+        name: nginx
+        state: absent
+
+    - name: create nginx service
+      import_tasks: create.yml
+
+  when:
+     - redeploy is defined
+     - '"nginx" in redeploy'
+
+- name: create nginx service
+  import_tasks: create.yml
+

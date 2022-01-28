@@ -1,0 +1,25 @@
+---
+- name: create lockers_core secret
+  docker_secret:
+    name: "lockers-core.json"
+    data: "{{ lookup('template','lockers-core.j2') | from_yaml | to_nice_json }}"
+    data_is_b64: no
+  ignore_errors: yes
+
+- name: create lockers_core service
+  docker_swarm_service:
+    name: lockers_core
+    image: "{{ lockers_core_image }}"
+    networks:
+      - farbooking-network
+    replicas: 1
+    env:
+      KEYSTORE_PASSWORD: "WmzI9pwvMuYQlORnftiS"
+    secrets:
+      - secret_name: lockers-core.json
+    placement:
+      constraints:
+        - "node.hostname=={{ groups['docker_nodes'][0] }}"
+    limits:
+      cpus: '0.20'
+      memory: 500M

@@ -1,0 +1,3 @@
+---
+mongodb_image: 'bitnami/mongodb:4.2.6'
+# defaults file for mongodb

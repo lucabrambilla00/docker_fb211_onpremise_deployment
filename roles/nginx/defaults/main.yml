@@ -1,0 +1,3 @@
+---
+nginx_image: 'openresty/openresty:latest'
+# defaults file for nginx

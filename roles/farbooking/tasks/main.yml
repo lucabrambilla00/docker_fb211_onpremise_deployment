@@ -1,0 +1,17 @@
+---
+- block:
+  - name: remove farbooking service
+    docker_swarm_service:
+      name: farbooking
+      state: absent
+  
+  - name: create service farbooking
+    import_tasks: create.yml
+  when:
+    - redeploy is defined
+    - '"farbooking" in redeploy'
+    
+- name: create service farbooking
+  import_tasks: create.yml
+# tasks file for farbooking
+

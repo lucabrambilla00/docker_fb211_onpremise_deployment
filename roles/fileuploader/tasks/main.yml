@@ -1,0 +1,19 @@
+---
+- block:
+  - name: remove fileuploader service
+    docker_swarm_service:
+      name: fileuploader
+      state: absent
+  
+  - name: create service fileuploader
+    import_tasks: create.yml
+  when:
+    - redeploy is defined
+    - '"fileuploader" in redeploy'
+    
+- name: create service fileuploader
+  import_tasks: create.yml
+    
+  
+
+    

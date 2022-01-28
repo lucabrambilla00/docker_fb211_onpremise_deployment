@@ -1,0 +1,40 @@
+---
+- name: create postgresql service
+  docker_swarm_service:
+    name: psql
+    image: "{{ psql_image }}"
+    placement:
+      constraints:
+        - "node.hostname=={{ groups['docker_nodes'][0] }}"
+    limits:
+      cpus: '0.50'
+      memory: 1000M
+    replicas: 1
+    networks:
+      - farbooking-network
+    publish:
+      - mode: ingress
+        protocol: tcp
+        published_port: 5432
+        target_port: 5432
+    env:
+      POSTGRESQL_PASSWORD: "{{ postgresql }}"
+      POSTGRESQL_FB_PASSWORD: "{{ farbooking }}"
+      POSTGRESQL_FN_PASSWORD: "{{ farnotifier }}"
+    mounts:
+      - source: postgresql_data
+        target: /bitnami/postgresql
+        type: volume
+        driver_config:
+          name: local
+          options:
+            type: none
+            device: "/swarm/farbooking/postgresql/data"
+            o: bind
+      - source: /swarm/farbooking/postgresql/init.sh
+        target: /docker-entrypoint-initdb.d/init.sh
+        type: bind
+  
+- name: wait container log creation
+  wait_for: timeout=20
+  delegate_to: localhost

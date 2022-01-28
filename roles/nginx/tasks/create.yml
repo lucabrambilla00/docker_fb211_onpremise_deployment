@@ -1,0 +1,43 @@
+---
+- name: Create secret nginx server 
+  community.docker.docker_secret:
+    name: nginx_server.pem
+    data: "{{ lookup('file', 'nginx.farbooking.internal.pem') }}"
+    data_is_b64: false
+    state: present
+    
+- name: Create key secret
+  community.docker.docker_secret:
+    name: nginx_key.pem
+    data: "{{ lookup('file', 'nginx.farbooking.internal.key.pem') }}"
+    data_is_b64: false
+    state: present
+
+- name: Create nginx service
+  docker_swarm_service:
+    name: nginx
+    image: "{{ nginx_image }}"
+    networks:
+      - farbooking-network
+    placement:
+      constraints:
+        - "node.hostname=={{ groups['docker_nodes'][0] }}"
+    limits:
+      cpus: '0.20'
+      memory: 500M
+    replicas: 1
+    secrets:
+      - secret_name: nginx_server.pem
+      - secret_name: nginx_key.pem
+    mounts:
+    - source: /swarm/farbooking/nginx/https.conf
+      target: /etc/nginx/conf.d/https.conf
+      type: bind
+    - source: /swarm/farbooking/nginx/nginx.conf
+      target: /usr/local/openresty/nginx/conf/nginx.conf
+      type: bind
+    publish: 
+      - mode: ingress
+        protocol: tcp 
+        published_port: 443
+        target_port: 443

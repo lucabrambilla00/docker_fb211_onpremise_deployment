@@ -1,0 +1,78 @@
+---
+- name: Sleep 20 seconds waiting farbooking log generation
+  wait_for:
+    timeout: 20
+  delegate_to: localhost
+  
+- name : get farbooking container ID
+  shell: docker ps --no-trunc | grep farbooking:2.11 | awk -F' ' '{print $1}'
+  register : farbooking_ID
+
+- name: check if farbooking is ready to accept connections
+  wait_for:
+    path: /var/lib/docker/containers/{{ farbooking_ID.stdout }}/{{ farbooking_ID.stdout }}-json.log
+    search_regex: started in
+    timeout: 240
+
+- name: get tenantID from farbooking
+  uri:
+    url: https://{{ farbooking_FQDN }}/farbooking/admin/svc/api/tenant
+    validate_certs: no
+    return_content: yes
+  register: tenantID
+
+- name: template 
+  template:
+    src: mongodb-primary/init-mongo.j2
+    dest: /swarm/farbooking/mongodb-primary/init-mongo.js
+
+- name: create mongodb-primary secret
+  docker_secret:
+    name: mongodb-primary.pem
+    data: "{{ lookup('template','mongodb-primary.pem') }}"
+
+- name: create mongoDB primary service
+  docker_swarm_service:
+    name: mongodb-primary
+    image: "{{ mongodb_image }}"
+    replicas: 1
+    networks:
+      - name: "farbooking-network"
+        aliases: 
+          - "mongodb-primary.internal"
+    placement:
+      constraints:
+        - "node.hostname=={{ groups['docker_nodes'][1] }}"
+    limits:
+      cpus: '0.50'
+      memory: 1024M
+    publish:
+      - mode: ingress
+        protocol: tcp
+        published_port: 27017
+        target_port: 27017
+    env:
+      MONGODB_ADVERTISED_HOSTNAME: "{{ adv_hostname }}"
+      MONGODB_REPLICA_SET_MODE: "{{ role }}"
+      MONGODB_ROOT_PASSWORD: "{{ rootpwd }}"
+      MONGODB_REPLICA_SET_KEY: "{{ replicasetkey }}"
+      MONGODB_EXTRA_FLAGS: "{{ extraflags }}"
+      MONGODB_SYSTEM_LOG_VERBOSITY: "{{ logverbosity }}"
+      MONGODB_INITSCRIPTS_DIR: /docker-entrypoint-initdb.d/
+  
+    secrets:
+      - secret_name: mongodb-primary.pem
+    
+    mounts:
+      - source: mongodb_master_data
+        target: /bitnami/mongodb
+        type: volume
+        driver_config:
+          name: local
+          options:
+            type: none
+            device: /swarm/farbooking/mongodb-primary/data
+            o: bind
+      - source: /swarm/farbooking/mongodb-primary/init-mongo.js
+        target: /docker-entrypoint-initdb.d/init-mongo.js
+        type: bind

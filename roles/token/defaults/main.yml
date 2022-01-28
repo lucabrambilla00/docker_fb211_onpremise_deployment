@@ -1,0 +1,3 @@
+---
+token_image: 'laraiot.azurecr.io/lara-iot-token-server:4.0.3-SNAPSHOT'
+# defaults file for token

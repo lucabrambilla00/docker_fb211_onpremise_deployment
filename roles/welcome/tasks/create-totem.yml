@@ -1,0 +1,14 @@
+---
+- name: create welcome-totem service
+  docker_swarm_service:
+    name: welcome-totem
+    image: "{{ welcome_totem_image }}"
+    networks:
+      - farbooking-network
+    placement:
+      constraints:
+        - "node.hostname=={{ groups['docker_nodes'][1] }}"
+    limits:
+      cpus: '0.20'
+      memory: 500M
+    replicas: 1

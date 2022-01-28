@@ -1,0 +1,25 @@
+---
+- name: create bootstrap secret
+  docker_secret:
+    name: "bootstrap.json"
+    data: "{{ lookup('template','bootstrap.j2') | from_yaml | to_nice_json }}"
+    data_is_b64: no
+  ignore_errors: yes
+
+- name: create bootstrap service
+  docker_swarm_service:
+    name: bootstrap
+    image: "{{ bootstrap_image }}"
+    networks:
+      - farbooking-network
+    placement:
+      constraints:
+        - "node.hostname=={{ groups['docker_nodes'][0] }}"
+    limits:
+      cpus: '0.20'
+      memory: 500M    
+    replicas: 1
+    env:
+      KEYSTORE_PASSWORD: "WmzI9pwvMuYQlORnftiS"
+    secrets:
+      - secret_name: bootstrap.json

@@ -1,0 +1,5 @@
+---
+farbooking: "farbooking"
+farnotifier: "farnotifier"
+postgresql: "postgresql"
+# vars file for psql

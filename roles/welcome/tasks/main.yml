@@ -1,0 +1,41 @@
+---
+  - block:
+    - name: remove welcome_core service
+      docker_swarm_service:
+        name: welcome_core
+        state: absent
+    - name: re-create service welcome_core
+      import_tasks: create-core.yml
+  
+    when:
+      - redeploy is defined
+      - '"welcome_core" in redeploy'
+  
+  - block:
+    - name: remove welcome-totem service
+      docker_swarm_service:
+        name: welcome-totem
+        state: absent
+    - name: create service welcome-totem
+      import_tasks: create-totem.yml
+    when:
+      - redeploy is defined
+      - '"welcome-totem" in redeploy'
+  
+  - block:
+    - name: remove welcome-ui service
+      docker_swarm_service:
+        name: welcome-ui
+        state: absent
+    - name: create service welcome-ui
+      import_tasks: create-ui.yml
+    when:
+      - redeploy is defined
+      - '"welcome-ui" in redeploy'
+
+  - name: create service welcome_core
+    import_tasks: create-core.yml
+  - name: create service welcome-totem
+    import_tasks: create-totem.yml
+  - name: create service welcome-ui
+    import_tasks: create-ui.yml

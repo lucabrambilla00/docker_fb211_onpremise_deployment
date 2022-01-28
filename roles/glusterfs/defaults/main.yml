@@ -1,0 +1,5 @@
+---
+# defaults file for glusterfs
+gluster_brick: /opt/gluster/brick
+gluster_volume_path: /swarm
+gluster_volume_name: gfs_volume

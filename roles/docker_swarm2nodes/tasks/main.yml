@@ -1,0 +1,121 @@
+---
+# tasks file for docker_node
+- name: Install required system packages
+  apt: 
+    name: "{{ package_docker }}" 
+    state: latest
+  loop_control:
+    loop_var: package_docker
+  loop:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - software-properties-common
+  - python3-pip
+  - gnupg-agent
+  - python3-setuptools
+
+- name: Add Docker GPG apt Key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker Repository
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu focal stable
+    state: present
+    update_cache: no
+
+- name: Install docker
+  apt:
+    name: "{{ docker_package }}"
+  loop:
+  - docker-ce
+  - containerd.io
+  - docker-ce-cli
+  loop_control:
+    loop_var: docker_package
+
+- name: config docker daemon
+  template: 
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+
+- name: install python docker lib
+  pip:
+    name: docker
+    state: latest
+    
+
+- name: Swarm node config - farbooking full
+  block:
+  - name: open ports for swarm
+    ufw:
+      rule: allow
+      port: "{{ __swarm_port.port }}"
+      proto: "{{ __swarm_port.proto }}"
+    loop_control:
+      loop_var: __swarm_port
+    loop:
+      - { port: "2376", proto: tcp }
+      - { port: "2377", proto: tcp }
+      - { port: "7946", proto: any }
+      - { port: "4789", proto: udp }
+  - name: restart docker service
+    service:
+      name: docker
+      state: restarted
+  - name: check and init swarm
+    block:
+    - name: Get info on Docker Swarm
+      community.docker.docker_swarm_info:
+      ignore_errors: yes
+      register: docker_swarm_info_result
+    - name: init swarm
+      community.docker.docker_swarm:
+        state: present
+      register: swarm_create_info
+      when: 
+        - docker_swarm_info_result['can_talk_to_docker'] 
+        - not docker_swarm_info_result['docker_swarm_active']
+    - debug: var=swarm_create_info
+    - name: create temp file
+      file:
+        path: /tmp/temp_token
+        state: touch
+      delegate_to: localhost
+      become: false
+      when: swarm_create_info.changed
+    - name: save token
+      lineinfile:
+        insertafter: EOF
+        line: "{{ swarm_create_info['swarm_facts']['JoinTokens']['Manager'] }}"
+        path: /tmp/temp_token
+      delegate_to: localhost
+      become: false
+      when: swarm_create_info.changed
+    when: inventory_hostname == groups.docker_nodes[0]
+  - name: join swarm
+    block:
+    - name: check
+      community.docker.docker_swarm_info:
+      ignore_errors: yes
+      register: swarm_info
+    - name: join swarm
+      community.docker.docker_swarm:
+        state: join
+        join_token: "{{ lookup('file','/tmp/temp_token')}}"
+        remote_addrs: [ "{{ groups.docker_nodes[0] }}" ]
+      when: 
+        - swarm_info['can_talk_to_docker'] 
+        - not swarm_info['docker_swarm_active'] 
+        - not swarm_info['docker_swarm_manager']
+    when: 
+      - inventory_hostname != groups.docker_nodes[0]
+  - name: cleanup
+    file:
+      path: /tmp/temp_token
+      state: absent
+    delegate_to: localhost
+    become: false
+    when: swarm_create_info.changed

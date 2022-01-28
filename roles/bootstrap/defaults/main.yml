@@ -1,0 +1,3 @@
+---
+bootstrap_image: 'farbooking.azurecr.io/far-core-bootstrap:1.0.0-SNAPSHOT'
+# defaults file for bootstrap

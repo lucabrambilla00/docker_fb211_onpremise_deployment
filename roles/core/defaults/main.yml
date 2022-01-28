@@ -1,0 +1,3 @@
+---
+core_image: 'laraiot.azurecr.io/lara-iot-core:4.0.3-SNAPSHOT'
+# defaults file for core

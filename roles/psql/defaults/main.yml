@@ -1,0 +1,3 @@
+---
+psql_image: 'bitnami/postgresql:10'
+# defaults file for psql

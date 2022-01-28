@@ -1,0 +1,3 @@
+---
+fileuploader_image: 'laraiot.azurecr.io/lara-driver-fileuploader:1.0.1'
+# defaults file for fileuploader

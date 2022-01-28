@@ -1,0 +1,16 @@
+---
+- block:
+  - name: remove mongodb-primary service
+    docker_swarm_service:
+      name: mongodb-primary
+      state: absent
+  - name: create mongodb-primary service
+    import_tasks: create.yml
+  when:
+    - redeploy is defined
+    - '"mongodb-primary" in redeploy'
+
+- name: create mongodb-primary service
+  import_tasks: create.yml
+
+

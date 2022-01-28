@@ -1,0 +1,40 @@
+---
+- block:
+    - name: remove lockers_core service
+      docker_swarm_service:
+        name: lockers_core
+        state: absent  
+    - name: create service lockers_core
+      import_tasks: create-core.yml
+  when:
+    - redeploy is defined
+    - '"lockers_core" in redeploy'
+
+- block:
+  - name: remove lockers-admin service
+    docker_swarm_service:
+      name: lockers-admin
+      state: absent
+  - name: create service lockers-admin
+    import_tasks: create-admin.yml
+  when:
+    - redeploy is defined
+    - '"lockers-admin" in redeploy'
+
+- block:
+  - name: remove lockers-maps service
+    docker_swarm_service:
+      name: lockers-maps
+      state: absent
+  - name: create service lockers-maps
+    import_tasks: create-maps.yml
+  when:
+    - redeploy is defined
+    - '"lockers-maps" in redeploy'
+
+- name: create service lockers_core
+  import_tasks: create-core.yml
+- name: create service lockers-maps
+  import_tasks: create-maps.yml
+- name: create service lockers-admin
+  import_tasks: create-admin.yml

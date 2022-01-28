@@ -1,0 +1,15 @@
+---
+- block:
+  - name: remove core service
+    docker_swarm_service:
+      name: core
+      state: absent
+  
+  - name: create service core
+    import_tasks: create.yml
+  when:
+    - redeploy is defined
+    - '"core" in redeploy'
+    
+- name: create service core
+  import_tasks: create.yml

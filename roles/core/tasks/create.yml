@@ -1,0 +1,24 @@
+---
+- name: create core secret
+  docker_secret:
+    name: core.json
+    data: "{{ lookup('template','core.j2') | from_yaml | to_nice_json }}"
+  ignore_errors: yes
+
+- name: create core service
+  docker_swarm_service:
+    name: core
+    image: "{{ core_image }}"
+    networks:
+      - farbooking-network
+    placement:
+      constraints:
+        - "node.hostname=={{ groups['docker_nodes'][1] }}"
+    limits:
+      cpus: '0.20'
+      memory: 500M
+    replicas: 1
+    env:
+      KEYSTORE_PASSWORD: "WmzI9pwvMuYQlORnftiS"
+    secrets:
+      - secret_name: core.json

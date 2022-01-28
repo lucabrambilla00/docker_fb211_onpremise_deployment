@@ -1,0 +1,117 @@
+---
+- name: Farbooking - docker 2 nodes on premise playbook
+  hosts: all
+  vars:
+    container_registry_fb: farbooking.azurecr.io
+    container_registry_fb_username: farbooking
+    container_registry_fb_password: 5HliutV+O0UqoPjPMiCMUDxOYPumjDUl
+  #####  farbooking_FQDN: da impostare nelle vars di farbooking
+
+  tasks:
+
+    - name: include images vars definition
+      include_vars:
+        file: image_vars.yml 
+
+#For permit crypted traffic between nodes, if you want skip this part don't use encrypted network
+    - name: Installing ethtool
+      ansible.builtin.package:
+        name: ethtool
+        state: present
+
+    - name: copy checksum offloading script
+      ansible.builtin.copy:
+        src: checksum_offloading.sh
+        dest: /tmp/checksum_offloading.sh
+    
+    - name: Execute the script
+      command: sh /tmp/checksum_offloading.sh "{{ ansible_host }}"
+
+    - name: Remove the script
+      ansible.builtin.file:
+        path: /tmp/checksum_offloading.sh
+        state: absent
+# end
+
+    - name: firewall initial setup
+      include_role:
+        name: fw-initial-setup
+
+    - name: install and create glusterfs
+      include_role:
+        name: glusterfs
+
+    - name: Create and configure swarm
+      include_role:
+        name: docker_swarm2nodes
+
+    - name: create directories and put files for postgres,nginx,fileuploader,mongodb 
+      include_role:
+        name: dirsandfiles
+        
+    - block:
+      - name: Log into farbooking registry
+        docker_login:
+          registry: "{{ container_registry_fb }}"
+          username: "{{ container_registry_fb_username }}"
+          password: "{{ container_registry_fb_password }}"
+        
+      - name: Create farbooking-network
+        docker_network:
+          name: farbooking-network
+          driver: overlay
+          driver_options:
+            encrypted: ""
+          ipam_config:      
+            - subnet: '172.28.0.0/16'
+
+      - name: Create postgresql service
+        include_role:
+          name: psql
+
+      - name: Create token service
+        include_role:
+          name: token
+      
+      - name: Create core service
+        include_role:
+          name: core
+
+      - name: Create nginx service
+        include_role:
+          name: nginx
+
+      - name: Sleep 20 seconds waiting token service completes start
+        wait_for:
+          timeout: 20
+        delegate_to: localhost
+      
+      - name: Create farbooking service
+        include_role:
+          name: farbooking
+
+      - name: Create mongodb-primary service
+        include_role:
+          name: mongodb
+
+      - name: Create bootstrap service
+        include_role:
+          name: bootstrap
+      
+      - name: Create fileuploader service
+        include_role:
+          name: fileuploader
+      
+      - name: Create lockers-core , lockers-admin , lockers-maps services
+        include_role:
+          name: lockers
+      
+      - name: Create persistence service
+        include_role:
+          name: persistence
+      
+      - name: Create welcome-core , welcome-totem , welcome-ui services
+        include_role:
+          name: welcome
+  
+      when: inventory_hostname == groups.docker_nodes[0]

@@ -1,0 +1,14 @@
+{
+        "server_listener": "0.0.0.0",
+        "port_listener": 8183,
+        "group_system_name": "core",
+        "role": "core",
+        "role_service": "https://tasks.nginx:443/api",
+        "persistence_service": "http://tasks.persistence:8183/persistence",
+        "folder_config": "/opt/apache-karaf-4.2.8/etc",
+        "java_keystore_password": "WmzI9pwvMuYQlORnftiS",
+        "folder_persistence": "/opt/lara-configuration",
+        "tClientId": "{{ bcrypt_bootstrap_tokenId }}",
+        "tClientUrl": "http://tasks.token:8183/edge/token/ask",
+        "tClientName": "bootstrap"
+}

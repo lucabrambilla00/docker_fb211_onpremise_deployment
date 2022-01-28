@@ -1,0 +1,5 @@
+---
+# vars file for glusterfs
+_peers_ip: []
+_local_ip_list: []
+__brick_list: []

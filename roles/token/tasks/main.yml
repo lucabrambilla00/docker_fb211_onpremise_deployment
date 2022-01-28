@@ -1,0 +1,20 @@
+---
+- block:
+    - name: remove token service
+      docker_swarm_service:
+        name: token
+        state: absent
+    - name: create token service
+      import_tasks: create.yml
+
+  when:
+    - redeploy is defined
+    - '"token" in redeploy'
+
+- name: create token service
+  import_tasks: create.yml
+
+
+
+
+

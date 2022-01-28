@@ -1,0 +1,6 @@
+---
+farbooking: "farbooking"
+farnotifier: "farnotifier"
+postgresql: "postgresql"
+farbooking_FQDN: "10.3.8.104"
+# vars file for farbooking

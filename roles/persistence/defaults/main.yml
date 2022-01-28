@@ -1,0 +1,3 @@
+---
+persistence_image: 'laraiot.azurecr.io/lara-iot-persistence-server:4.0.3-SNAPSHOT'
+# defaults file for persistence

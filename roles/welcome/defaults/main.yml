@@ -1,0 +1,5 @@
+---
+# defaults file for welcome
+welcome_core_image: 'farbooking.azurecr.io/visitors-core:1.0.0-SNAPSHOT'
+welcome_ui_image: 'laraiot.azurecr.io/visitors-ui:4.0.1-beta-1080'
+welcome_totem_image: 'laraiot.azurecr.io/visitors-totem:1.0.0-beta-1082'

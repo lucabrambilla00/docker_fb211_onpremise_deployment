@@ -1,0 +1,116 @@
+---
+# tasks file for glusterfs
+#- name: Add Gluster GPG apt Key
+#  apt_key:
+#    url: http://ppa.launchpad.net/gluster/glusterfs-6/ubuntu/dists/focal/Release.gpg
+#    state: present
+#    id: 13E01B7B3FE869A9
+#    validate_certs: no
+
+- name: Add Gluster Repository
+  apt_repository:
+    repo: deb http://ppa.launchpad.net/gluster/glusterfs-6/ubuntu focal main
+    state: present
+    update_cache: no
+
+- name: Install Glusterfs
+  apt: 
+    name: glusterfs-server
+
+- name: get gluster peer ip
+  set_fact:
+    _peers_ip: "{{ _peers_ip + [ hostvars[item].ansible_host ] }}"
+  loop: "{{ groups.docker_nodes }}"
+  delegate_to: localhost
+
+- set_fact:
+    _local_ip_list: "{{ _local_ip_list + [ansible_facts['default_ipv4']['address']] }}"
+  delegate_to: localhost
+
+- name: enable Gluster Daemon/Management port - 24007 to 24010 tcp
+  ufw:
+    rule: allow
+    from_ip: "{{ peer_ip }}/32"
+    to_port: "24007:24010"
+    proto: tcp
+  loop: "{{ _peers_ip | difference(_local_ip_list) }}"
+  loop_control:
+    loop_var: peer_ip
+
+- name: enable traffic from peers - 49152-49155/tcp
+  ufw:
+    rule: allow
+    from_ip: "{{ peer_ip }}/32"
+    to_port: "49152:49155"
+    proto: tcp
+  loop: "{{ _peers_ip | difference(_local_ip_list) }}"
+  loop_control:
+    loop_var: peer_ip
+  become: true
+
+- name: enable traffic for Gluster NFS service - 38465 - 38467 tcp
+  ufw:
+    rule: allow
+    from_ip: "{{ peer_ip }}/32"
+    to_port: "38465:38467"
+    proto: tcp
+  loop: "{{ _peers_ip | difference(_local_ip_list) }}"
+  loop_control:
+    loop_var: peer_ip
+  become: true
+
+- name: enable traffic for portmapper - 111
+  ufw:
+    rule: allow
+    from_ip: "{{ peer_ip }}/32"
+    to_port: "111"
+    proto: any
+  loop: "{{ _peers_ip | difference(_local_ip_list) }}"
+  loop_control:
+    loop_var: peer_ip
+  become: true
+
+- name: create GlusterFS brick directory
+  file:
+    path: "{{ gluster_brick }}"
+    state: directory
+
+- name: check gluster service
+  service:
+    name: glusterd
+    state: started
+    enabled: true
+
+- name: configure gluster master
+  block:
+    - name: add GlusterFS Peers
+      gluster.gluster.gluster_peer:
+        state: present
+        nodes: "{{ _peers_ip[1:] }}"
+      when: _peers_ip | count > 1 
+    - name: create GlusterFS Volume
+      gluster.gluster.gluster_volume:
+        state: present
+        name: gfs_volume
+        bricks: "{{ gluster_brick }}"
+        replicas: "{{ groups.docker_nodes | count }}"
+        cluster: "{{ _peers_ip }}"
+        force: yes
+      run_once: true
+      when: _peers_ip | count > 1
+  when: inventory_hostname == groups.docker_nodes[0] 
+
+- name: create GlusterFS volume directory
+  file:
+    path: "{{ gluster_volume_path }}"
+    state: directory
+
+- name: edit fstab with gluster volume
+  lineinfile:
+    insertafter: EOF
+    path: /etc/fstab
+    line: "localhost:/{{ gluster_volume_name }} {{ gluster_volume_path }} glusterfs defaults,_netdev 0 0" 
+  when: _peers_ip | count > 1
+- name: mount gluster volume 
+  shell: mount -a
+  when: _peers_ip | count > 1

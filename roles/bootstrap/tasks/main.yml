@@ -1,0 +1,17 @@
+---
+- block:
+  - name: remove bootstrap service
+    docker_swarm_service:
+      name: bootstrap
+      state: absent
+  - name: create service bootstrap
+    import_tasks: create.yml 
+  
+  when:
+    - redeploy is defined
+    - '"bootstrap" in redeploy'
+    
+- name: create service bootstrap
+  import_tasks: create.yml
+
+    

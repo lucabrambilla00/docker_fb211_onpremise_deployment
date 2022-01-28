@@ -1,0 +1,8 @@
+---
+adv_hostname: "mongodb-primary.internal"
+farbooking_FQDN: 10.3.8.182
+role: "primary"
+rootpwd: "CYXTSve2g9OdcSt9vbBR"
+replicasetkey: "replicasetkey 123"
+extraflags: "--tlsMode=allowTLS --tlsCertificateKeyFile=/run/secrets/mongodb-primary.pem --wiredTigerCacheSizeGB 3"
+logverbosity: "0"

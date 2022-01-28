@@ -1,0 +1,14 @@
+---
+- name: create lockers-admin service
+  docker_swarm_service:
+    name: lockers-admin
+    image: "{{ lockers_admin_image }}"
+    networks:
+      - farbooking-network
+    replicas: 1
+    placement:
+      constraints:
+        - "node.hostname=={{ groups['docker_nodes'][0] }}"
+    limits:
+      cpus: '0.20'
+      memory: 500M

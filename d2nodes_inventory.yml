@@ -1,0 +1,22 @@
+---
+all:
+  children:
+    lb:
+    docker_nodes:
+      hosts:
+        lara4litemig1.farnetworks.corp:
+          ansible_host: 10.3.8.104
+        lara4litemig2.farnetworks.corp:
+          ansible_host: 10.3.8.182
+  vars:
+    __delete_stack: false
+    __delete_secrets: false
+    __cleanup: true
+    # vm vars
+    ansible_python_interpreter: auto
+    ansible_connection: ssh
+    ansible_ssh_user: admin.far
+    ansible_ssh_pass: 1passworD
+    #ansible_become: false
+    ansible_become_method: sudo
+    ansible_become_pass: 1passworD

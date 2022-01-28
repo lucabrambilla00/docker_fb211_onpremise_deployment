@@ -1,0 +1,24 @@
+---
+- name: create persistence secret
+  docker_secret:
+    name: persistence.json
+    data: "{{ lookup('template','persistence.j2') | from_yaml | to_nice_json }}"
+  ignore_errors: yes
+
+- name: create persistence service
+  docker_swarm_service:
+    name: persistence
+    image: "{{ persistence_image }}"
+    placement:
+      constraints:
+        - "node.hostname=={{ groups['docker_nodes'][1] }}"
+    limits:
+      cpus: '0.20'
+      memory: 500M
+    replicas: 1
+    networks:
+      - farbooking-network
+    env:
+      KEYSTORE_PASSWORD: "WmzI9pwvMuYQlORnftiS"
+    secrets:
+      - secret_name: persistence.json

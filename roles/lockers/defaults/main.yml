@@ -1,0 +1,5 @@
+---
+lockers_admin_image: 'laraiot.azurecr.io/lockers-admin-ui:4.0.1-beta-1078'
+lockers_maps_image: 'laraiot.azurecr.io/lockers-maps-ui:4.0.1-beta-1079'
+lockers_core_image: 'farbooking.azurecr.io/lockers-core:1.0.0-SNAPSHOT'
+# defaults file for lockers

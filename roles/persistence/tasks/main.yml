@@ -1,0 +1,16 @@
+---
+- block:
+    - name: remove persistence service
+      docker_swarm_service:
+        name: persistence
+        state: absent
+
+    - name: create persistence service
+      import_tasks: create.yml
+  when:
+     - redeploy is defined
+     - '"persistence" in redeploy'
+
+- name: create persistence service
+  import_tasks: create.yml
+# tasks file for persistence

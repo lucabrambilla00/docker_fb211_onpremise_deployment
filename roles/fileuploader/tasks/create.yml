@@ -1,0 +1,34 @@
+---
+- name: create fileuploader secret
+  docker_secret:
+    name: "fileuploader.json"
+    data: "{{ lookup('template','fileuploader.j2') | from_json | to_json }}"
+    data_is_b64: no
+
+- name: create fileuploader service
+  docker_swarm_service:
+    name: fileuploader
+    image: "{{ fileuploader_image }}"
+    networks:
+      - farbooking-network
+    placement:
+      constraints:
+        - "node.hostname=={{ groups['docker_nodes'][1] }}"
+    limits:
+      cpus: '0.20'
+      memory: 500M
+    replicas: 1
+    env:
+      KEYSTORE_PASSWORD: "WmzI9pwvMuYQlORnftiS"
+    secrets:
+      - secret_name: fileuploader.json
+    mounts:
+      - source: fileuploader_data
+        target: /opt/fileuploader/data
+        type: volume
+        driver_config:
+          name: local
+          options:
+            type: none
+            device: /swarm/farbooking/fileuploader/data
+            o: bind
