@@ -18,7 +18,7 @@ Vengono sfruttati i ruoli ansible, nel playbook principale (playbook-FB.yml) è 
 Durante l'esecuzione del playbook viene attivato il firewall interno alle macchine con tutte le regole necessarie alla VLAN vmware + rete interna Docker (alcune nel ruolo fw-initial-setup altre per docker + gluster)
 La rete interna docker è una overlay encrypted, questo richiede una particolare configurazione per evitare che i pacchetti criptati vengano scartati dalle interfacce (parte #For permit crypted traffic between nodes, if you want skip this part don't use encrypted network del playbook)
 
-![network](network.png)
+![network](network.PNG)
 
 
 # Redeploy
