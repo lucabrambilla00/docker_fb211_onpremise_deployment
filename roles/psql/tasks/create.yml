@@ -5,7 +5,7 @@
     image: "{{ psql_image }}"
     placement:
       constraints:
-        - "node.hostname=={{ groups['docker_nodes'][0] }}"
+        - "node.hostname=={{ groups['docker_nodes'][1] }}"
     limits:
       cpus: '0.50'
       memory: 1000M

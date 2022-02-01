@@ -6,6 +6,8 @@ L'installazione prevede un docker swarm a 2 nodi con storage condiviso tramite g
 
 ## Prerequisiti
 - N. 2 virtual machines
+- 4 CPU
+- 8 GB RAM
 - 80 GB HD dedicati all'applicativo, preferibilmente in FS separato per prevenire il blocco della VM in caso di riempimento applicativo
 - Vnic con accesso completo ad internet
 
@@ -27,3 +29,11 @@ La rete interna docker è una overlay encrypted, questo richiede una particolare
 è possibile effettuare il redeploy di una singola app , definendo la extra vars redeploy(array) inserendo all'interno la/le app che si vogliono re-deployare (esempio welcome-core)
 
     ansible-playbook playbook-FB.yml -i d2nodes_inventory.yml  --extra-vars="redeploy={welcome_core}"
+
+
+# Constraints
+
+Le applicazioni sono pre-allocate sui nodi per la corretta distribuzione delle risorse computazionali
+
+![](./constraints.PNG)
+
