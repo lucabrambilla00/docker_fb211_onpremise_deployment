@@ -1,0 +1,14 @@
+---
+- name: copy gluster-mount.service to create gluster-mount service
+  copy:
+    src: roles/gluster-mount/files/gluster-mount.service
+    dest: /etc/systemd/system/gluster-mount.service
+    owner: 0
+    group: 0
+    mode: 0644
+
+- name: Enable service for /swarm mount at reboot
+  ansible.builtin.service:
+    name: gluster-mount
+    enabled: yes
+# tasks file for gluster-mount

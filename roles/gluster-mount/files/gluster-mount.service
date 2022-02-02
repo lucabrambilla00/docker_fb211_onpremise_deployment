@@ -1,0 +1,11 @@
+[Unit]
+Description=Docker mount
+
+[Mount]
+What=localhost:/gfs_volume
+Where=/swarm
+Type=glusterfs
+Options=defaults
+
+[Install]
+WantedBy=multi-user.target
